@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random as rand
+import curses as cs
 from enum import Enum
 
 
@@ -11,26 +11,50 @@ class Direction(Enum):
     WEST = (-1, 0, "E")
 
 
-height = 9
-width = 9
+class Cell:
+    def __init__(self) -> None:
+        self.sides = {d: True for d in Direction}
+        self.grid = [["🭽", "🭶", "🭾"],
+                     ["🭰", " ", "🭵"],
+                     ["🭼", "🭻", "🭿"]]
 
-rand.seed(input("choose a random seed please"))
-maze = [[{d: True for d in Direction} for x in range(height)] for y in range(width)]
-bit_maze = []
+    def print_grid(self, cord: list, window: cs.window):
+        for y in range(3):
+            for x in range(3):
+                window.addstr(cord[0] + y, cord[1] + x, self.grid[y][x],)
 
-for row in maze:
-    new_row = []
-    for cell in row:
-        val = 0
-        if cell[Direction.NORTH]:
-            val |= 1
-        if cell[Direction.SOUTH]:
-            val |= 2
-        if cell[Direction.EAST]:
-            val |= 4
-        if cell[Direction.WEST]:
-            val |= 8
-        new_row.append(val)
-    bit_maze.append(new_row)
-for row in bit_maze:
-    print(row)
+    def smash_north(self):
+        self.grid[0][0] = "🭰"
+        self.grid[0][1] = " "
+        self.grid[0][2] = "🭵"
+
+    def smash_south(self):
+        self.grid[2][0] = "🭰"
+        self.grid[2][1] = " "
+        self.grid[2][2] = "🭵"
+
+    def smash_west(self):
+        self.grid[0][0] = "🭶"
+        self.grid[1][0] = " "
+        self.grid[2][0] = "🭻"
+
+    def smash_east(self):
+        self.grid[0][2] = "🭶"
+        self.grid[1][2] = " "
+        self.grid[2][2] = "🭻"
+
+
+def main(window: cs.window):
+    height = 9
+    width = 9
+    maze = [[Cell() for x in range(height)] for y in range(width)]
+    for y in range(height):
+        for x in range(width):
+            maze[y][x].smash_north()
+            maze[y][x].print_grid([y * 3, x * 3], window)
+
+    window.refresh()
+    window.getch()
+
+
+cs.wrapper(main)
